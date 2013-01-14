@@ -142,7 +142,10 @@ def new_calculate_range(view, r):
 
     # todo: move this to the parsing phase? Do all vim commands default to '.' as a range?
     if not any([left, right]):
-        left = right = calculate_relative_ref(view, '.')
+        if r['left_offset'] == 0:
+            left = right = 1
+        else:
+            left = right = calculate_relative_ref(view, '.')
 
     # todo: reverse range automatically if needed
     return [(left, right)], False
