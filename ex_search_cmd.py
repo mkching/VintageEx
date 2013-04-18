@@ -22,6 +22,7 @@ def compute_flags(view, term):
 
 class SearchImpl(object):
     last_term = ""
+    last_region = []
     def __init__(self, view, cmd, remember=True, start_sel=None):
         self.start_sel = start_sel
         self.remember = remember
@@ -97,7 +98,8 @@ class SearchImpl(object):
                 self.view.add_regions("vi_search", [next_match], "search.vi",
                                       sublime.DRAW_OUTLINED)
             else:
-                self.view.sel().add(next_match)
+                SearchImpl.last_region = [ next_match ]
+                self.view.sel().add( sublime.Region( next_match.a, next_match.a ) )
             self.view.show(next_match)
         else:
             sublime.status_message("VintageEx: Pattern not found:" + self.cmd)
@@ -107,7 +109,7 @@ class ViRepeatSearchBackward(sublime_plugin.TextCommand):
    def run(self, edit):
         if ex_commands.VintageExState.search_buffer_type == 'pattern_search':
             SearchImpl(self.view, "?" + SearchImpl.last_term,
-                      start_sel=self.view.sel()).search()
+                      start_sel=SearchImpl.last_region).search()
         elif ex_commands.VintageExState.search_buffer_type == 'find_under':
             self.view.window().run_command("find_prev", {"select_text": False})
 
@@ -116,7 +118,7 @@ class ViRepeatSearchForward(sublime_plugin.TextCommand):
     def run(self, edit):
         if ex_commands.VintageExState.search_buffer_type == 'pattern_search':
             SearchImpl(self.view, SearchImpl.last_term,
-                       start_sel=self.view.sel()).search()
+                       start_sel=SearchImpl.last_region).search()
         elif ex_commands.VintageExState.search_buffer_type == 'find_under':
             self.view.window().run_command("find_next", {"select_text": False})
 
